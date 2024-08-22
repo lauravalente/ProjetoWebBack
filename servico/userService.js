@@ -1,6 +1,6 @@
 const User = require('../model/UserModel');
 
-const registerUser = async (username, password) => {
+const registerUser = async (username, password, name) => {
     // Verifica se o usuário já existe
     const existingUser = await User.findOne({ where: { username } });
     if (existingUser) {
@@ -10,7 +10,8 @@ const registerUser = async (username, password) => {
     // Cria um novo usuário com username e senha em texto claro
     const user = await User.create({
         username,
-        password, // Senha em texto claro
+        password, 
+        name
     });
 
     return user;

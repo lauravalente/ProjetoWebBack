@@ -1,26 +1,31 @@
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const router = express.Router();
-const sequelize = require('../helpers/ConexãoBD.js'); // Importa a conexão com o banco de dados
-const User = require('../model/UserModel.js'); // Importa o modelo de usuário (é necessário criar esse modelo)
+const User = require('../model/UserModel.js'); // Importa o modelo de usuário
 
-router.get("/auth", async (req, res) => {
+// Rota para autenticação
+router.post('/auth', async (req, res) => {
     const { usuario, senha } = req.body;
 
     try {
         // Verifica se o usuário existe no banco de dados
         const user = await User.findOne({ where: { username: usuario } });
-        
+
         if (!user) {
-            return res.status(403).json({ logged: false, mensagem: 'Usuário não encontrado' });
+            return res.status(404).json({ logged: false, mensagem: 'Usuário não encontrado' });
         }
-        
+
         // Verifica se a senha está correta
-        const isPasswordValid = user.password === senha; // Aqui é uma comparação simples, mas idealmente use hash
+        const isPasswordValid = user.password === senha; 
 
         if (isPasswordValid) {
-            const token = jwt.sign({ usuario: usuario }, '123!@#', { expiresIn: '30 min' });
-            res.json({ logged: true, token: token });
+            // Gera o token JWT
+            const token = jwt.sign(
+                { usuario: { id: user.id, username: user.username, isAdmin: user.isAdmin } },
+                '123!@#', 
+                { expiresIn: '30m' } 
+            );
+            res.json({ logged: true, token });
         } else {
             res.status(403).json({ logged: false, mensagem: 'Senha inválida' });
         }
@@ -29,4 +34,4 @@ router.get("/auth", async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = router;
