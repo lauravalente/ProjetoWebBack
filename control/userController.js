@@ -4,11 +4,11 @@ const userService = require('../servico/userService'); // Verifique o caminho
 const Auth = require('../helpers/Auth');
 const User = require('../model/UserModel'); // Adicione essa linha
 
+// Rota para registrar um novo usuário
 router.post('/register', async (req, res) => {
     try {
         const { username, password, name, isAdmin } = req.body;
 
-        // Verifica se isAdmin foi enviado na requisição
         if (isAdmin !== undefined) {
             return res.status(400).json({ status: false, msg: 'Não é permitido definir isAdmin no registro.' });
         }
@@ -26,6 +26,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Rota para criar um novo usuário administrador
 router.post('/admin', Auth.validaAcesso, Auth.verifyAdmin, async (req, res) => {
     try {
         const { name, username, password } = req.body;
@@ -41,6 +42,57 @@ router.post('/admin', Auth.validaAcesso, Auth.verifyAdmin, async (req, res) => {
     } catch (error) {
         console.error('Erro ao criar administrador:', error.message);
         res.status(500).json({ error: 'Erro ao criar administrador.', details: error.message });
+    }
+});
+
+// Rota para atualizar um usuário
+router.put('/:id', Auth.validaAcesso, async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const updateData = req.body;
+        const usuario = req.usuario;
+
+        // Verifica se o usuário está tentando atualizar a si mesmo ou se é um administrador
+        if (usuario.id !== userId) {
+            const currentUser = await User.findByPk(usuario.id);
+            const userToUpdate = await User.findByPk(userId);
+
+            if (!currentUser.isAdmin || (userToUpdate && userToUpdate.isAdmin)) {
+                return res.status(403).json({ mensagem: 'Acesso negado. Você só pode atualizar a si mesmo ou outros usuários não administradores.' });
+            }
+        }
+
+        const updatedUser = await userService.updateUser(userId, updateData);
+
+        res.status(200).json({ message: 'Usuário atualizado com sucesso.', user: updatedUser });
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error.message);
+        res.status(500).json({ error: 'Erro ao atualizar usuário.', details: error.message });
+    }
+});
+
+// Rota para excluir um usuário
+router.delete('/:id', Auth.validaAcesso, async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const usuario = req.usuario;
+
+        // Verifica se o usuário está tentando excluir a si mesmo ou se é um administrador
+        if (usuario.id !== userId) {
+            const currentUser = await User.findByPk(usuario.id);
+            const userToDelete = await User.findByPk(userId);
+
+            if (!currentUser.isAdmin || (userToDelete && userToDelete.isAdmin)) {
+                return res.status(403).json({ mensagem: 'Acesso negado. Você só pode excluir a si mesmo ou outros usuários não administradores.' });
+            }
+        }
+
+        await userService.deleteUser(userId);
+
+        res.status(200).json({ message: 'Usuário excluído com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao excluir usuário:', error.message);
+        res.status(500).json({ error: 'Erro ao excluir usuário.', details: error.message });
     }
 });
 
