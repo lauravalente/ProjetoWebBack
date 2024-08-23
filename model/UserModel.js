@@ -5,7 +5,7 @@ const User = sequelize.define('User', {
     username: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true, // Garante que o nome de usuário seja único
+        unique: true,
     },
     password: {
         type: DataTypes.STRING,
@@ -13,14 +13,14 @@ const User = sequelize.define('User', {
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: true, // Permite que o nome seja opcional
+        allowNull: true,
     },
     isAdmin: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false, // Define o valor padrão como false
+        defaultValue: false,
     }
 }, {
-    timestamps: true, // Adiciona createdAt e updatedAt
+    timestamps: true,
 });
 
 module.exports = User;
