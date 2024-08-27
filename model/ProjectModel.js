@@ -8,12 +8,12 @@ const Project = sequelize.define('Project', {
         allowNull: false,
         unique: true,
     },
-    leaderId: {
-        type: DataTypes.INTEGER,
+    leaderUsername: {
+        type: DataTypes.STRING,
         allowNull: false,
         references: {
             model: 'Users',
-            key: 'id',
+            key: 'username',
         },
     }
 }, {

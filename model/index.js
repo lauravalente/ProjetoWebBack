@@ -5,7 +5,7 @@ const Task = require('./TaskModel');
 
 // Associações
 Project.hasMany(User, { foreignKey: 'projectId', as: 'projectMembers', onDelete: 'SET NULL' });
-Project.belongsTo(User, { foreignKey: 'leaderId', as: 'projectLeader', onDelete: 'SET NULL' });
+Project.belongsTo(User, { foreignKey: 'leaderUsername', as: 'projectLeader', onDelete: 'SET NULL' });
 User.belongsTo(Project, { foreignKey: 'projectId', as: 'project', onDelete: 'SET NULL' });
 
 Task.belongsTo(Project, { foreignKey: 'projectId', as: 'taskProject', onDelete: 'SET NULL' });
