@@ -70,5 +70,29 @@ module.exports = {
             // Lança um erro que pode ser capturado pelo controlador
             throw new Error(`Erro ao excluir o projeto: ${error.message}`);
         }
+    },
+    addUserToProject: async (projectId, userId) => {
+        // Recupera o projeto pelo ID
+        const project = await Project.findByPk(projectId);
+        if (!project) {
+            throw new Error('Projeto não encontrado');
+        }
+
+        // Recupera o usuário pelo ID
+        const user = await User.findByPk(userId);
+        if (!user) {
+            throw new Error('Usuário não encontrado');
+        }
+
+        // Verifica se o usuário já está associado a outro projeto
+        if (user.projectId && user.projectId !== projectId) {
+            throw new Error('Usuário já está associado a outro projeto');
+        }
+
+        // Associa o usuário ao projeto
+        user.projectId = projectId;
+        await user.save();
+
+        return { message: 'Usuário vinculado ao projeto com sucesso' };
     }
 };

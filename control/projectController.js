@@ -117,6 +117,29 @@ router.delete('/:id', validaAcesso, async (req, res) => {
         res.status(500).json({ mensagem: 'Erro ao excluir projeto', erro: error.message });
     }
 });
+router.post('/:projectId/user/:userId', validaAcesso, async (req, res) => {
+    const { projectId, userId } = req.params;
+    const leaderUsername = req.usuario.username; // Obtendo o nome de usuário do líder a partir do token
 
+    try {
+        // Recupera o projeto
+        const project = await projectService.getProjectById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: 'Projeto não encontrado' });
+        }
 
+        // Verifica se o usuário autenticado é o líder do projeto
+        if (project.leaderUsername !== leaderUsername) {
+            return res.status(403).json({ message: 'Você não tem permissão para vincular usuários a este projeto' });
+        }
+
+        // Vincula o usuário ao projeto
+        await projectService.addUserToProject(projectId, userId);
+
+        // Envia uma resposta de sucesso
+        res.status(200).json({ message: 'Usuário vinculado ao projeto com sucesso' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao vincular usuário ao projeto', error: error.message });
+    }
+});
 module.exports = router;

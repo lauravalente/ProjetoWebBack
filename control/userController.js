@@ -25,6 +25,43 @@ router.post('/register', async (req, res) => {
         res.status(400).json({ status: false, msg: error.message });
     }
 });
+// Rota para listar todos os usuários de um projeto com paginação
+router.get('/project/:projectId', Auth.validaAcesso, async (req, res) => {
+    const { limite = 5, pagina = 1 } = req.query;
+
+    try {
+        const projectId = parseInt(req.params.projectId);
+        const users = await userService.getUsersByProject(Number(projectId), Number(limite), Number(pagina));
+
+        res.status(200).json({
+            users: users,
+            total: users.length,
+            limit: Number(limite),
+            page: Number(pagina)
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar usuários do projeto', error: error.message });
+    }
+});
+
+// Rota para listar todos os usuários com paginação
+router.get('/', Auth.validaAcesso, async (req, res) => {
+    const { limite = 5, pagina = 1 } = req.query;
+
+    try {
+        const users = await userService.getAllUsers(Number(limite), Number(pagina));
+
+        res.status(200).json({
+            users: users.rows,
+            total: users.count,
+            limit: Number(limite),
+            page: Number(pagina),
+            totalPages: Math.ceil(users.count / Number(limite))
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar usuários', error: error.message });
+    }
+});
 
 // Rota para criar um novo usuário administrador
 router.post('/admin', Auth.validaAcesso, Auth.verifyAdmin, async (req, res) => {
