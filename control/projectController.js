@@ -17,7 +17,7 @@ router.post('/', validaAcesso, async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', validaAcesso, async (req, res) => {
     try {
         const limit = parseInt(req.query.limite) || 5; // Padrão: 5
         const page = parseInt(req.query.pagina) || 1;  // Padrão: 1
@@ -32,18 +32,18 @@ router.get('/', async (req, res) => {
 
         // Retorna os projetos paginados e informações sobre a paginação
         res.status(200).json({
-            total: count,             // Total de projetos
+            total: count,                     // Total de projetos
             totalPages: Math.ceil(count / limit), // Total de páginas
-            currentPage: page,        // Página atual
-            limit: limit,             // Limite de registros por página
-            projects: projects        // Lista de projetos na página atual
+            currentPage: page,                // Página atual
+            limit: limit,                     // Limite de registros por página
+            projects: projects                // Lista de projetos na página atual
         });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar projetos', error: error.message });
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validaAcesso, async (req, res) => {
     try {
         const project = await projectService.getProjectById(req.params.id);
         if (!project) {
@@ -51,9 +51,10 @@ router.get('/:id', async (req, res) => {
         }
         res.status(200).json(project);
     } catch (error) {
-        res.status(404).json({ message: 'Erro ao buscar projeto', error: error.message });
+        res.status(500).json({ message: 'Erro ao buscar projeto', error: error.message });
     }
 });
+
 
 router.put('/:id', validaAcesso, async (req, res) => {
     const { projectName } = req.body;

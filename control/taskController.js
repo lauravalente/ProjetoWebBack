@@ -6,49 +6,161 @@ const router = express.Router();
 
 router.post('/', validaAcesso, async (req, res) => {
     const { title, description, points, projectId, requesterId, responsibleId } = req.body;
+    const createdById = req.usuario.id; // Certifique-se de que req.usuario está definido
+
     try {
-        const task = await taskService.createTask(title, description, points, projectId, requesterId, responsibleId, req.usuario.id);
-        res.status(201).json(task);
+        const task = await taskService.createTask(
+            title, 
+            description, 
+            points, 
+            projectId, 
+            requesterId, 
+            responsibleId, 
+            createdById
+        );
+
+        res.status(201).json(task); // Sucesso
     } catch (error) {
-        res.status(400).json({ message: 'Erro ao criar tarefa', error });
+        console.error("Erro ao criar a tarefa:", error.message);
+
+        let statusCode = 500;
+        let errorMessage = 'Erro ao criar tarefa';
+
+        if (error.message.includes('não encontrado')) {
+            statusCode = 404;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ message: errorMessage });
     }
 });
 
-router.get('/', async (req, res) => {
+
+router.get('/', validaAcesso, async (req, res) => {
+    const { limite = 5, pagina = 1 } = req.query; // Valores padrão: limite 5, página 1
+
     try {
-        const tasks = await taskService.getAllTasks();
+        const tasks = await taskService.getAllTasks(Number(limite), Number(pagina));
         res.status(200).json(tasks);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar tarefas', error });
+        let statusCode = 500;
+        let errorMessage = 'Erro ao buscar tarefas';
+
+        if (error.message.includes('O limite deve ser')) {
+            statusCode = 400;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ mensagem: errorMessage });
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validaAcesso, async (req, res) => {
     try {
         const task = await taskService.getTaskById(req.params.id);
         res.status(200).json(task);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao buscar tarefa', error });
+        let statusCode = 500;
+        let errorMessage = 'Erro ao buscar tarefa';
+
+        if (error.message.includes('não encontrada')) {
+            statusCode = 404;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ mensagem: errorMessage });
+    }
+});
+
+router.get('/project/:projectId', validaAcesso, async (req, res) => {
+    const { limite = 5, pagina = 1 } = req.query; // Valores padrão: limite 5, página 1
+    const projectId = req.params.projectId;
+
+    try {
+        const tasks = await taskService.getAllTasksByProjectId(projectId, Number(limite), Number(pagina));
+        res.status(200).json(tasks);
+    } catch (error) {
+        let statusCode = 500;
+        let errorMessage = 'Erro ao buscar tarefas';
+
+        if (error.message.includes('O limite deve ser')) {
+            statusCode = 400;
+            errorMessage = error.message;
+        } else if (error.message.includes('Projeto não encontrado')) {
+            statusCode = 404;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ mensagem: errorMessage });
     }
 });
 
 router.put('/:id', validaAcesso, async (req, res) => {
     const { title, description, points, projectId, requesterId, responsibleId } = req.body;
+    const userId = req.usuario.id; // Obtém o ID do usuário autenticado do token
+
     try {
-        const updatedTask = await taskService.updateTask(req.params.id, { title, description, points, projectId, requesterId, responsibleId });
+        // Obtém a tarefa que será atualizada
+        const task = await taskService.getTaskById(req.params.id);
+        
+        // Verifica se a tarefa foi encontrada
+        if (!task) {
+            return res.status(404).json({ message: 'Tarefa não encontrada' });
+        }
+
+        // Verifica se o usuário que está tentando atualizar a tarefa é o criador da tarefa
+        if (task.createdById !== userId) {
+            return res.status(403).json({ message: 'Você não tem permissão para atualizar esta tarefa' });
+        }
+
+        // Atualiza a tarefa com os novos dados
+        const updatedTask = await taskService.updateTask(req.params.id, {
+            title,
+            description,
+            points,
+            projectId,
+            requesterId,
+            responsibleId
+        });
+
         res.status(200).json(updatedTask);
     } catch (error) {
-        res.status(400).json({ message: 'Erro ao atualizar tarefa', error });
+        let statusCode = 500;
+        let errorMessage = 'Erro ao atualizar tarefa';
+
+        // Verifica se houve um problema com os IDs referenciados (projeto, solicitante, responsável)
+        if (error.message.includes('não encontrado')) {
+            statusCode = 404;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ message: errorMessage });
     }
 });
 
+
 router.delete('/:id', validaAcesso, async (req, res) => {
+    const taskId = req.params.id;
+    const userId = req.usuario.id; // Obtém o ID do usuário autenticado
+
     try {
-        await taskService.deleteTask(req.params.id);
-        res.status(204).send();
+        await taskService.deleteTask(taskId, userId);
+        res.status(200).json({ mensagem: 'Tarefa excluída com sucesso' });
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao excluir tarefa', error });
+        let statusCode = 500;
+        let errorMessage = 'Erro ao excluir tarefa';
+
+        if (error.message.includes('não encontrada')) {
+            statusCode = 404;
+            errorMessage = error.message;
+        } else if (error.message.includes('permissão')) {
+            statusCode = 403;
+            errorMessage = error.message;
+        }
+
+        res.status(statusCode).json({ mensagem: errorMessage });
     }
 });
+
 
 module.exports = router;
