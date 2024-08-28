@@ -5,7 +5,7 @@ const User = require('../model/UserModel');
 const Project = require('../model/ProjectModel');
 const Task = require('../model/TaskModel');
 
-router.get('/install', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         // Sincroniza os modelos com o banco de dados
         await sequelize.sync({ force: true });

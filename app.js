@@ -7,8 +7,13 @@ const LoginRouter = require('./control/autenticacao.js');
 const projectController = require('./control/projectController');
 const taskController = require('./control/taskController');
 const installRoutes = require('./control/installController');
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger.json');
 
 var app = express();
+
+// Rota para a documentação Swagger
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
