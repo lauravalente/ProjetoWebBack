@@ -20,7 +20,7 @@ module.exports = {
     },
 
     getAllProjects: async (limit, page) => {
-        const offset = (page - 1) * limit; // Calcula o offset com base na página e no limite
+        const offset = (page - 1) * limit; 
     
         // Validação dos parâmetros de limite
         const validLimits = [5, 10, 30];
@@ -52,44 +52,36 @@ module.exports = {
         await project.update(updateData);
         return project;
     },
-        // Função para excluir um projeto
+       
     deleteProject: async (id) => {
         try {
-            // Encontra o projeto pelo ID
             const project = await Project.findByPk(id);
             if (!project) {
                 throw new Error('Projeto não encontrado');
             }
 
-            // Exclui o projeto
             await project.destroy();
 
-            // Retorna uma mensagem de sucesso
             return { mensagem: 'Projeto excluído com sucesso' };
         } catch (error) {
-            // Lança um erro que pode ser capturado pelo controlador
             throw new Error(`Erro ao excluir o projeto: ${error.message}`);
         }
     },
     addUserToProject: async (projectId, userId) => {
-        // Recupera o projeto pelo ID
         const project = await Project.findByPk(projectId);
         if (!project) {
             throw new Error('Projeto não encontrado');
         }
 
-        // Recupera o usuário pelo ID
         const user = await User.findByPk(userId);
         if (!user) {
             throw new Error('Usuário não encontrado');
         }
 
-        // Verifica se o usuário já está associado a outro projeto
         if (user.projectId && user.projectId !== projectId) {
             throw new Error('Usuário já está associado a outro projeto');
         }
 
-        // Associa o usuário ao projeto
         user.projectId = projectId;
         await user.save();
 

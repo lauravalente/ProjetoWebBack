@@ -1,21 +1,19 @@
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const router = express.Router();
-const User = require('../model/UserModel.js'); // Importa o modelo de usuário
+const User = require('../model/UserModel.js'); 
 
 // Rota para autenticação
 router.post('/auth', async (req, res) => {
     const { usuario, senha } = req.body;
 
     try {
-        // Verifica se o usuário existe no banco de dados
         const user = await User.findOne({ where: { username: usuario } });
 
         if (!user) {
             return res.status(404).json({ logged: false, mensagem: 'Usuário não encontrado' });
         }
 
-        // Verifica se a senha está correta
         const isPasswordValid = user.password === senha; 
 
         if (isPasswordValid) {

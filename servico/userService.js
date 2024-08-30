@@ -2,7 +2,6 @@ const User = require('../model/UserModel');
 const Project = require('../model/ProjectModel');
 
 module.exports = {
-    // Função para registrar um novo usuário
     registerUser: async (username, password, name) => {
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser) {
@@ -18,7 +17,6 @@ module.exports = {
         return user;
     },
 
-    // Função para atualizar um usuário
     updateUser: async (id, updateData) => {
         const user = await User.findByPk(id);
         if (!user) {
@@ -29,7 +27,6 @@ module.exports = {
         return user;
     },
 
-    // Função para excluir um usuário
     deleteUser: async (id) => {
         const user = await User.findByPk(id);
         if (!user) {
@@ -39,7 +36,6 @@ module.exports = {
         await user.destroy();
     },
 
-    // Função para listar todos os usuários de um projeto com paginação
     getUsersByProject: async (projectId, limit, page) => {
         const offset = (page - 1) * limit;
 
@@ -57,7 +53,6 @@ module.exports = {
         return users;
     },
 
-    // Função para listar todos os usuários com paginação
     getAllUsers: async (limit, page) => {
         const offset = (page - 1) * limit;
 

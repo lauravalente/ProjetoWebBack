@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../helpers/ConexãoBD');
-const User = require('./UserModel'); // Verifique o caminho
+const User = require('./UserModel');
 
 const Project = sequelize.define('Project', {
     projectName: {

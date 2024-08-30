@@ -10,7 +10,6 @@ router.get('/', async (req, res) => {
         // Sincroniza os modelos com o banco de dados
         await sequelize.sync({ force: true });
 
-        // Criação de dados iniciais para a tabela de usuários
         await User.bulkCreate([
             { username: 'admin', password: 'admin', name: 'Admin User', isAdmin: true },
             { username: 'Laura', password: '123', name: 'Laura Valente', isAdmin: true },
@@ -20,7 +19,6 @@ router.get('/', async (req, res) => {
             { username: 'Matheus', password: '123', name: 'Matheus Souza', isAdmin: false }
         ]);
 
-        // Criação de dados iniciais para a tabela de projetos
         await Project.bulkCreate([
             { projectName: 'Project One', leaderUsername: 'admin' },
             { projectName: 'Project Alpha', leaderUsername: 'Laura' },
@@ -30,7 +28,6 @@ router.get('/', async (req, res) => {
             { projectName: 'Project Epsilon', leaderUsername: 'Luciana' }
         ]);
 
-        // Criação de dados iniciais para a tabela de tarefas
         await Task.bulkCreate([
             { title: 'Criar a tela de login', description: 'Desenvolver a tela de login do usuário', points: 5, projectId: 1, requesterId: 1, responsibleId: 2, createdById: 1 },
             { title: 'Criar API de login', description: 'Implementar API para autenticação de login', points: 8, projectId: 1, requesterId: 2, responsibleId: 3, createdById: 2 },

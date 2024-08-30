@@ -19,24 +19,22 @@ router.post('/', validaAcesso, async (req, res) => {
 
 router.get('/', validaAcesso, async (req, res) => {
     try {
-        const limit = parseInt(req.query.limite) || 5; // Padrão: 5
-        const page = parseInt(req.query.pagina) || 1;  // Padrão: 1
+        const limit = parseInt(req.query.limite) || 5; 
+        const page = parseInt(req.query.pagina) || 1; 
 
-        // Validação dos parâmetros de página
         if (page < 1) {
             return res.status(400).json({ message: 'Página deve ser um número positivo' });
         }
 
-        // Recupera os projetos com paginação
         const { rows: projects, count } = await projectService.getAllProjects(limit, page);
 
         // Retorna os projetos paginados e informações sobre a paginação
         res.status(200).json({
-            total: count,                     // Total de projetos
-            totalPages: Math.ceil(count / limit), // Total de páginas
-            currentPage: page,                // Página atual
-            limit: limit,                     // Limite de registros por página
-            projects: projects                // Lista de projetos na página atual
+            total: count,                     
+            totalPages: Math.ceil(count / limit), 
+            currentPage: page,                
+            limit: limit,                     
+            projects: projects                
         });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar projetos', error: error.message });
@@ -55,13 +53,11 @@ router.get('/:id', validaAcesso, async (req, res) => {
     }
 });
 
-
 router.put('/:id', validaAcesso, async (req, res) => {
     const { projectName } = req.body;
-    const leaderUsername = req.usuario.username; // Obtendo o nome de usuário do líder a partir do token
+    const leaderUsername = req.usuario.username; 
 
     try {
-        // Recupera o projeto pelo ID
         const project = await projectService.getProjectById(req.params.id);
         if (!project) {
             return res.status(404).json({ message: 'Projeto não encontrado' });
@@ -76,19 +72,15 @@ router.put('/:id', validaAcesso, async (req, res) => {
         // Atualiza o projeto com os dados fornecidos
         const updatedProject = await projectService.updateProject(req.params.id, { projectName });
 
-        // Envia o projeto atualizado como resposta
         res.status(200).json(updatedProject);
     } catch (error) {
-        // Retorna uma mensagem de erro em caso de falha
         res.status(400).json({ message: 'Erro ao atualizar projeto', error: error.message });
     }
 });
 
-
-// Rota para excluir um projeto
 router.delete('/:id', validaAcesso, async (req, res) => {
     const projectId = req.params.id;
-    const leaderUsername = req.usuario.username; // Obtendo o nome de usuário do líder a partir do token
+    const leaderUsername = req.usuario.username; 
 
     try {
         // Recupera o projeto
@@ -108,15 +100,14 @@ router.delete('/:id', validaAcesso, async (req, res) => {
             return res.status(403).json({ mensagem: 'Você não tem permissão para excluir este projeto' });
         }
 
-        // Exclui o projeto
         await projectService.deleteProject(projectId);
 
-        // Envia uma resposta de sucesso ao cliente
         res.status(200).json({ mensagem: 'Projeto excluído com sucesso' });
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao excluir projeto', erro: error.message });
     }
 });
+
 router.post('/:projectId/user/:userId', validaAcesso, async (req, res) => {
     const { projectId, userId } = req.params;
     const leaderUsername = req.usuario.username; // Obtendo o nome de usuário do líder a partir do token

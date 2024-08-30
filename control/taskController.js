@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', validaAcesso, async (req, res) => {
     const { title, description, points, projectId, requesterId, responsibleId } = req.body;
-    const createdById = req.usuario.id; // Certifique-se de que req.usuario está definido
+    const createdById = req.usuario.id; 
 
     try {
         const task = await taskService.createTask(
@@ -19,7 +19,7 @@ router.post('/', validaAcesso, async (req, res) => {
             createdById
         );
 
-        res.status(201).json(task); // Sucesso
+        res.status(201).json(task); 
     } catch (error) {
         console.error("Erro ao criar a tarefa:", error.message);
 
@@ -35,9 +35,8 @@ router.post('/', validaAcesso, async (req, res) => {
     }
 });
 
-
 router.get('/', validaAcesso, async (req, res) => {
-    const { limite = 5, pagina = 1 } = req.query; // Valores padrão: limite 5, página 1
+    const { limite = 5, pagina = 1 } = req.query; 
 
     try {
         const tasks = await taskService.getAllTasks(Number(limite), Number(pagina));
@@ -73,7 +72,7 @@ router.get('/:id', validaAcesso, async (req, res) => {
 });
 
 router.get('/project/:projectId', validaAcesso, async (req, res) => {
-    const { limite = 5, pagina = 1 } = req.query; // Valores padrão: limite 5, página 1
+    const { limite = 5, pagina = 1 } = req.query; 
     const projectId = req.params.projectId;
 
     try {
@@ -97,13 +96,11 @@ router.get('/project/:projectId', validaAcesso, async (req, res) => {
 
 router.put('/:id', validaAcesso, async (req, res) => {
     const { title, description, points, projectId, requesterId, responsibleId } = req.body;
-    const userId = req.usuario.id; // Obtém o ID do usuário autenticado do token
+    const userId = req.usuario.id; 
 
     try {
-        // Obtém a tarefa que será atualizada
         const task = await taskService.getTaskById(req.params.id);
         
-        // Verifica se a tarefa foi encontrada
         if (!task) {
             return res.status(404).json({ message: 'Tarefa não encontrada' });
         }
@@ -113,7 +110,6 @@ router.put('/:id', validaAcesso, async (req, res) => {
             return res.status(403).json({ message: 'Você não tem permissão para atualizar esta tarefa' });
         }
 
-        // Atualiza a tarefa com os novos dados
         const updatedTask = await taskService.updateTask(req.params.id, {
             title,
             description,
@@ -138,10 +134,9 @@ router.put('/:id', validaAcesso, async (req, res) => {
     }
 });
 
-
 router.delete('/:id', validaAcesso, async (req, res) => {
     const taskId = req.params.id;
-    const userId = req.usuario.id; // Obtém o ID do usuário autenticado
+    const userId = req.usuario.id; 
 
     try {
         await taskService.deleteTask(taskId, userId);

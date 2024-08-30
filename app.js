@@ -12,15 +12,13 @@ const swaggerFile = require('./swagger.json');
 
 var app = express();
 
-// Rota para a documentação Swagger
-app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use('/api/projects', projectController); // Integração da rota de projetos
-app.use('/api/tasks', taskController); // Integração da rota de tarefas
-app.use('/user', userController); // Integração da rota
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+app.use('/api/projects', projectController); 
+app.use('/api/tasks', taskController); 
+app.use('/user', userController); 
 app.use('/', LoginRouter);
 app.use('/install', installRoutes);
 

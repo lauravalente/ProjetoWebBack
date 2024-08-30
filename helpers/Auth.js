@@ -4,7 +4,7 @@ const User = require('../model/UserModel.js');
 module.exports = {
     validaAcesso: (req, res, next) => {
         const bearer = req.headers['authorization'] || '';
-        const token = bearer.split(' ')[1]; // Pega o token após 'Bearer'
+        const token = bearer.split(' ')[1]; 
     
         if (!token) {
           return res.status(401).json({ mensagem: 'Token não fornecido' });
@@ -31,7 +31,7 @@ module.exports = {
           const user = await User.findByPk(usuario.id);
     
           if (user && user.isAdmin) {
-            next(); // Usuário é administrador, permitir a ação
+            next(); // Usuário é administrador, permitir a ação, continuar
           } else {
             res.status(403).json({ mensagem: 'Acesso negado. Privilégios de administrador necessários.' });
           }
@@ -39,5 +39,5 @@ module.exports = {
           console.error('Erro ao verificar permissões:', error.message);
           res.status(500).json({ mensagem: 'Erro ao verificar permissões do usuário.', error: error.message });
         }
-      }
-    };
+    }
+};

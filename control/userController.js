@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const userService = require('../servico/userService'); // Verifique o caminho
+const userService = require('../servico/userService'); 
 const Auth = require('../helpers/Auth');
-const User = require('../model/UserModel'); // Adicione essa linha
+const User = require('../model/UserModel'); 
 
 // Rota para registrar um novo usuário
 router.post('/register', async (req, res) => {
@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
         res.status(400).json({ status: false, msg: error.message });
     }
 });
-// Rota para listar todos os usuários de um projeto com paginação
+
 router.get('/project/:projectId', Auth.validaAcesso, async (req, res) => {
     const { limite = 5, pagina = 1 } = req.query;
 
@@ -44,7 +44,6 @@ router.get('/project/:projectId', Auth.validaAcesso, async (req, res) => {
     }
 });
 
-// Rota para listar todos os usuários com paginação
 router.get('/', Auth.validaAcesso, async (req, res) => {
     const { limite = 5, pagina = 1 } = req.query;
 
@@ -72,7 +71,6 @@ router.post('/admin', Auth.validaAcesso, Auth.verifyAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Nome, nome de usuário e senha são obrigatórios.' });
         }
 
-        // Cria um novo usuário administrador
         const newUser = await User.create({ name, username, password, isAdmin: true });
 
         res.status(201).json({ message: 'Administrador criado com sucesso.', user: newUser });
@@ -82,7 +80,6 @@ router.post('/admin', Auth.validaAcesso, Auth.verifyAdmin, async (req, res) => {
     }
 });
 
-// Rota para atualizar um usuário
 router.put('/:id', Auth.validaAcesso, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
@@ -108,7 +105,7 @@ router.put('/:id', Auth.validaAcesso, async (req, res) => {
     }
 });
 
-// Rota para excluir um usuário
+
 router.delete('/:id', Auth.validaAcesso, async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
