@@ -70,6 +70,4 @@ Acesse a rota **localhost/install/** para instalar o banco de dados e popular as
 6 - Documentação da API: 
 Acesse a documentação da API na rota **localhost/swagger/docs**
 
-<h3>Estrutura do Projeto</h3>
 
-Em breve
