@@ -2,6 +2,7 @@ const express = require('express');
 const projectService = require('../servico/projectService');
 const { validaAcesso } = require('../helpers/Auth');
 const User = require('../model/UserModel');
+const isLeader = require('../helpers/IsLeader');
 
 const router = express.Router();
 
@@ -53,84 +54,39 @@ router.get('/:id', validaAcesso, async (req, res) => {
     }
 });
 
-router.put('/:id', validaAcesso, async (req, res) => {
+router.put('/:id', validaAcesso, isLeader, async (req, res) => {
     const { projectName } = req.body;
-    const leaderUsername = req.usuario.username; 
 
     try {
-        const project = await projectService.getProjectById(req.params.id);
-        if (!project) {
-            return res.status(404).json({ message: 'Projeto não encontrado' });
-        }
-
-        // Verifica se o usuário autenticado é o líder do projeto
-        const leader = await User.findOne({ where: { username: leaderUsername } });
-        if (!leader || project.leaderUsername !== leader.username) {
-            return res.status(403).json({ message: 'Você não tem permissão para atualizar este projeto' });
-        }
-
         // Atualiza o projeto com os dados fornecidos
         const updatedProject = await projectService.updateProject(req.params.id, { projectName });
-
         res.status(200).json(updatedProject);
     } catch (error) {
         res.status(400).json({ message: 'Erro ao atualizar projeto', error: error.message });
     }
 });
 
-router.delete('/:id', validaAcesso, async (req, res) => {
+router.delete('/:id', validaAcesso, isLeader, async (req, res) => {
     const projectId = req.params.id;
-    const leaderUsername = req.usuario.username; 
 
     try {
-        // Recupera o projeto
-        const project = await projectService.getProjectById(projectId);
-        if (!project) {
-            return res.status(404).json({ mensagem: 'Projeto não encontrado' });
-        }
-
-        // Recupera o líder associado ao username
-        const leader = await User.findOne({ where: { username: leaderUsername } });
-        if (!leader) {
-            return res.status(404).json({ mensagem: 'Líder não encontrado' });
-        }
-
-        // Verifica se o usuário autenticado é o líder do projeto
-        if (project.leaderUsername !== leader.username) {
-            return res.status(403).json({ mensagem: 'Você não tem permissão para excluir este projeto' });
-        }
-
         await projectService.deleteProject(projectId);
-
         res.status(200).json({ mensagem: 'Projeto excluído com sucesso' });
     } catch (error) {
         res.status(500).json({ mensagem: 'Erro ao excluir projeto', erro: error.message });
     }
 });
 
-router.post('/:projectId/user/:userId', validaAcesso, async (req, res) => {
+router.post('/:projectId/user/:userId', validaAcesso, isLeader, async (req, res) => {
     const { projectId, userId } = req.params;
-    const leaderUsername = req.usuario.username; // Obtendo o nome de usuário do líder a partir do token
 
     try {
-        // Recupera o projeto
-        const project = await projectService.getProjectById(projectId);
-        if (!project) {
-            return res.status(404).json({ message: 'Projeto não encontrado' });
-        }
-
-        // Verifica se o usuário autenticado é o líder do projeto
-        if (project.leaderUsername !== leaderUsername) {
-            return res.status(403).json({ message: 'Você não tem permissão para vincular usuários a este projeto' });
-        }
-
         // Vincula o usuário ao projeto
         await projectService.addUserToProject(projectId, userId);
-
-        // Envia uma resposta de sucesso
         res.status(200).json({ message: 'Usuário vinculado ao projeto com sucesso' });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao vincular usuário ao projeto', error: error.message });
     }
 });
+
 module.exports = router;
